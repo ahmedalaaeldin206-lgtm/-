@@ -1,0 +1,21 @@
+{
+  "id": "./",
+  "name": "متابعة الأوردرات",
+  "short_name": "الأوردرات",
+  "description": "متابعة الأوردرات والتسليم والشحن والأرباح",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#faf8fa",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

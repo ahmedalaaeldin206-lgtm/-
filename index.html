@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<meta name="description" content="تطبيق متابعة الأوردرات وحالات التسليم وحساب الشحن والأرباح">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>متابعة الأوردرات</title>
+<style>
+:root{--ink:#29252a;--muted:#77717a;--line:#e9e3e8;--pink:#f5e8ef;--pink2:#ead3df;--bg:#faf8fa;--green:#dff2e6;--yellow:#fff1cf;--red:#fbe2e2;--purple:#eee7fa}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Tahoma,Arial,sans-serif}
+header{background:white;border-bottom:1px solid var(--line);padding:22px 16px 16px;text-align:center}
+h1{font-size:25px;margin:0 0 7px}header p{margin:0;color:var(--muted);font-size:13px}
+main{max-width:1050px;margin:auto;padding:16px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.stat{background:white;border:1px solid var(--line);border-radius:14px;padding:13px;text-align:center}
+.stat b{display:block;font-size:23px;margin-bottom:4px}.stat span{font-size:12px;color:var(--muted)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+input,select,textarea,button{font:inherit}
+.search{flex:1;min-width:190px;padding:12px;border:1px solid var(--line);border-radius:10px;background:white}
+button{border:0;border-radius:10px;padding:11px 14px;cursor:pointer;font-weight:bold}
+.primary{background:#29252a;color:white}.soft{background:var(--pink);color:#4d3542}.filter{background:white;border:1px solid var(--line);color:var(--ink)}
+.section-title{display:flex;align-items:center;justify-content:space-between;margin:20px 2px 10px}
+.section-title h2{font-size:18px;margin:0}.count{color:var(--muted);font-size:12px}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.card{background:white;border:1px solid var(--line);border-radius:15px;padding:15px;box-shadow:0 2px 9px #33223308}
+.card-top{display:flex;justify-content:space-between;gap:8px;align-items:start}
+.name{font-size:17px;font-weight:bold}.sub{font-size:12px;color:var(--muted);margin-top:4px}
+.price{font-weight:bold;background:var(--pink);border-radius:9px;padding:7px 10px;white-space:nowrap}
+.status{display:inline-block;border-radius:20px;padding:5px 10px;font-size:12px;margin:12px 0 8px;background:#f0edf0}
+.status[data-s="تم التسليم"]{background:var(--green)}.status[data-s="تأجيل"]{background:var(--yellow)}.status[data-s="عدم استلام"]{background:var(--red)}.status[data-s="لم يتم الرد"]{background:var(--purple)}.status[data-s="إلغاء"]{background:#e8e8e8;color:#666}
+.info{font-size:13px;line-height:1.8;margin:5px 0;overflow-wrap:anywhere}.info strong{color:#6b5b66}
+.card select{width:100%;padding:10px;border:1px solid var(--line);border-radius:9px;background:white;margin-top:9px}
+.actions{display:flex;gap:7px;margin-top:9px}.actions button{flex:1;font-size:12px;padding:9px}
+.empty{padding:30px;text-align:center;color:var(--muted);background:white;border:1px dashed var(--line);border-radius:12px;grid-column:1/-1}
+dialog{border:0;border-radius:16px;width:min(560px,calc(100% - 24px));padding:0;box-shadow:0 15px 60px #0003}
+dialog::backdrop{background:#211a2280}.modal{padding:18px}.modal h2{margin:0 0 12px}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field{display:flex;flex-direction:column;gap:5px}.field.full{grid-column:1/-1}.field label{font-size:12px;color:var(--muted)}
+.field input,.field textarea,.field select{padding:10px;border:1px solid var(--line);border-radius:9px;width:100%;background:white}
+.modal-actions{display:flex;gap:8px;justify-content:flex-start;margin-top:14px}
+footer{text-align:center;color:var(--muted);font-size:11px;padding:22px}
+@media(max-width:650px){.stats{grid-template-columns:repeat(2,1fr)}.cards{grid-template-columns:1fr}h1{font-size:22px}.formgrid{grid-template-columns:1fr}.field.full{grid-column:auto}}
+@media print{body{background:white}.toolbar,.actions,.card select,header p,footer{display:none!important}.cards{display:block}.card{break-inside:avoid;margin-bottom:8px;box-shadow:none}.stats{grid-template-columns:repeat(4,1fr)}}
+</style></head>
+<body>
+<header><h1>متابعة الأوردرات ♡</h1><p>سجل حالة كل أوردر وتابع التسليم بسهولة</p></header>
+<main>
+<div class="stats">
+ <div class="stat"><b id="total">9</b><span>كل الأوردرات</span></div>
+ <div class="stat"><b id="delivered">0</b><span>تم التسليم</span></div>
+ <div class="stat"><b id="pending">9</b><span>لسه مفتوحة</span></div>
+ <div class="stat"><b id="sum">0 ج</b><span>إجمالي الأوردرات المستلمة قبل خصم الشحن</span></div>
+ <div class="stat"><b id="shippingTotal">0 ج</b><span>فلوس الشحن المستلمة (55 ج لكل أوردر)</span></div>
+ <div class="stat"><b id="netTotal">0 ج</b><span>صافي الأوردرات المستلمة بدون الشحن</span></div>
+</div>
+<div class="toolbar">
+ <input class="search" id="search" placeholder="ابحث بالاسم أو رقم التليفون أو العنوان…">
+ <select class="filter" id="areaFilter"><option value="">كل المناطق</option><option>شبرا الخيمة</option><option>شبرا مصر</option></select>
+ <select class="filter" id="statusFilter"><option value="">كل الحالات</option><option>لم يتم الرد</option><option>تم التسليم</option><option>تأجيل</option><option>عدم استلام</option><option>إلغاء</option></select>
+ <button class="primary" id="addBtn">+ إضافة أوردر</button><button class="soft" onclick="window.print()">طباعة</button>
+</div>
+<div id="list"></div>
+</main><footer>بياناتك محفوظة على نفس المتصفح والجهاز باستخدام التخزين المحلي.</footer>
+<dialog id="dlg"><form class="modal" id="orderForm">
+<h2 id="formTitle">إضافة أوردر جديد</h2><input type="hidden" id="editId">
+<div class="formgrid">
+<div class="field"><label>اسم العميل</label><input id="name" required></div>
+<div class="field"><label>رقم التليفون</label><input id="phone" inputmode="tel" required></div>
+<div class="field"><label>رقم بديل</label><input id="alt"></div>
+<div class="field"><label>المنطقة</label><select id="area"><option>شبرا الخيمة</option><option>شبرا مصر</option><option>أخرى</option></select></div>
+<div class="field full"><label>العنوان</label><textarea id="address" rows="2" required></textarea></div>
+<div class="field full"><label>تفاصيل الأوردر</label><textarea id="details" rows="2"></textarea></div>
+<div class="field full"><label>صوّر الفاتورة أو اختار صورتها</label><input id="invoice" type="file" accept="image/*" capture="environment"><small id="invoiceHint" style="color:#777">تقدر تفتح الكاميرا وتصوّر الفاتورة مباشرة.</small><img id="invoicePreview" alt="معاينة الفاتورة" style="display:none;max-width:100%;max-height:220px;object-fit:contain;border:1px solid #e9e3e8;border-radius:10px;padding:4px"></div>
+<div class="field"><label>إجمالي سعر الأوردر شامل الشحن (جنيه)</label><input id="price" type="number" min="0" value="0"></div>
+<div class="field"><label>حالة الأوردر</label><select id="status"><option>لم يتم الرد</option><option>تم التسليم</option><option>تأجيل</option><option>عدم استلام</option><option>إلغاء</option></select></div>
+</div>
+<div class="modal-actions"><button class="primary" type="submit">حفظ الأوردر</button><button class="filter" type="button" id="cancelBtn">إلغاء</button></div>
+</form></dialog>
+<script>
+const initial = [{"id": 1, "area": "شبرا الخيمة", "name": "سما عمرو", "phone": "1107238510", "alt": "", "address": "8 شارع اللواء، بمنطي، شبرا الخيمة، القليوبية", "details": "4 تلبيسة سوري، قطعة واحدة أسود", "price": 260, "status": "لم يتم الرد"}, {"id": 2, "area": "شبرا الخيمة", "name": "ممدوح عبد المطلب", "phone": "115000760", "alt": "", "address": "شارع أولاد محمد نجيب، متفرع من شارع السلام، أرض محمد كامل، شبرا الخيمة، القليوبية", "details": "4 تلبيسة سوري، أبيض وأسود وأوف وايت وبيج", "price": 260, "status": "لم يتم الرد"}, {"id": 3, "area": "شبرا الخيمة", "name": "محمد سمير", "phone": "1116317794", "alt": "", "address": "عزبة عثمان، شارع الصحابة، رقم 19، شبرا الخيمة، القليوبية", "details": "6 بندانة كوفي راوند برطاط، ألوان: أسود، بني، زهري، رمادي غامق، زيتي، جيشي", "price": 270, "status": "لم يتم الرد"}, {"id": 4, "area": "شبرا الخيمة", "name": "أميرة محمود", "phone": "1014912571", "alt": "1144550347", "address": "شارع الصحابة، شبرا الخيمة، عند صيدلية محمد فهمي، القليوبية", "details": "6 بندانة رباط بدعامة، أبيض وأسود وبني وكحلي", "price": 270, "status": "لم يتم الرد"}, {"id": 5, "area": "شبرا الخيمة", "name": "لميس محمد", "phone": "1104171074", "alt": "1111968196", "address": "4 شارع الشهداء، متفرع من شارع الروضة، منشية عبد المنعم رياض 3، بجانب فرع كازيون المحلاوي، القليوبية", "details": "9 بندانة كوفي راوند برطاط، الألوان حسب الفاتورة", "price": 370, "status": "لم يتم الرد"}, {"id": 6, "area": "شبرا مصر", "name": "محمد جمال", "phone": "1002539689", "alt": "", "address": "شارع الشيخ الظواهري، متفرع من شارع شبرا، بجوار محل أبو مازن، الدور الأول، باكوته 21، القاهرة", "details": "6 قطع بندانة بامبو، ألوان متعددة حسب الفاتورة", "price": 260, "status": "لم يتم الرد"}, {"id": 7, "area": "شبرا مصر", "name": "مها صبحي", "phone": "12223197015", "alt": "", "address": "تقسيم البازنجي، متفرع من شارع دنشواي، برج النور 14، فوق محلات مودرن هوم، القاهرة", "details": "5 قطع؛ تفاصيل الألوان غير واضحة بالكامل بالفاتورة", "price": 260, "status": "لم يتم الرد"}, {"id": 8, "area": "شبرا مصر", "name": "محمد محمود", "phone": "1005004262", "alt": "1009145058", "address": "196 شارع ترعة جزيرة بدران، روض الفرج، فوق مطعم الإخلاص، الدور الثاني، القاهرة", "details": "5 بندانة كوفي راوند برطاط + 2 أسود، كحلي، بني", "price": 260, "status": "لم يتم الرد"}, {"id": 9, "area": "شبرا مصر", "name": "شهد عبد المجيد", "phone": "01203780625", "alt": "", "address": "كوبانية المياه القديمة، روض الفرج، القاهرة", "details": "8 قطع تلبيسة سوري، ألوان متعددة حسب الفاتورة", "price": 460, "status": "لم يتم الرد"}];
+const key='order_tracker_ar_v1';
+let orders;
+try{orders=JSON.parse(localStorage.getItem(key))||initial}catch(e){orders=initial}
+const statuses=['لم يتم الرد','تم التسليم','تأجيل','عدم استلام','إلغاء'];
+const SHIPPING_FEE=55;
+const el=id=>document.getElementById(id);
+function save(){localStorage.setItem(key,JSON.stringify(orders));render()}
+function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function render(){
+ const delivered=orders.filter(o=>o.status==='تم التسليم').length;
+ el('total').textContent=orders.length;el('delivered').textContent=delivered;
+ el('pending').textContent=orders.filter(o=>!['تم التسليم','إلغاء'].includes(o.status)).length;
+ const deliveredOrders=orders.filter(o=>o.status==='تم التسليم');
+ const gross=deliveredOrders.reduce((a,o)=>a+(Number(o.price)||0),0);
+ const shipping=deliveredOrders.length*SHIPPING_FEE;
+ el('sum').textContent=gross+' ج';
+ el('shippingTotal').textContent=shipping+' ج';
+ el('netTotal').textContent=(gross-shipping)+' ج';
+ const q=el('search').value.trim().toLowerCase(), area=el('areaFilter').value, st=el('statusFilter').value;
+ const filtered=orders.filter(o=>(!area||o.area===area)&&(!st||o.status===st)&&(!q||[o.name,o.phone,o.alt,o.address,o.details].join(' ').toLowerCase().includes(q)));
+ const groups=['شبرا الخيمة','شبرا مصر','أخرى'];
+ el('list').innerHTML=groups.map(g=>{
+  const arr=filtered.filter(o=>(o.area||'أخرى')===g);if(!arr.length)return '';
+  return `<section><div class="section-title"><h2>${g}</h2><span class="count">${arr.length} أوردر</span></div><div class="cards">${arr.map(o=>`
+  <article class="card"><div class="card-top"><div><div class="name">${esc(o.name)}</div><div class="sub">أوردر رقم ${o.id}</div></div><div class="price">${Number(o.price)||0} جنيه</div></div>
+  <div class="info"><strong>سعر الأوردر شامل الشحن:</strong> ${Number(o.price)||0} ج<br><strong>الشحن:</strong> ${SHIPPING_FEE} ج<br><strong>سعر الأوردر بدون الشحن:</strong> ${(Number(o.price)||0)-SHIPPING_FEE} ج</div>
+  ${o.invoice?`<div class="info"><strong>الفاتورة:</strong> <a href="${o.invoice}" target="_blank" rel="noopener">عرض صورة الفاتورة</a></div>`:''}
+  <span class="status" data-s="${esc(o.status)}">${esc(o.status)}</span>
+  <div class="info"><strong>التليفون:</strong> ${esc(o.phone)} ${o.alt?'<br><strong>بديل:</strong> '+esc(o.alt):''}</div>
+  <div class="info"><strong>العنوان:</strong> ${esc(o.address)}</div><div class="info"><strong>التفاصيل:</strong> ${esc(o.details||'—')}</div>
+  <select aria-label="حالة الأوردر" onchange="changeStatus(${o.id},this.value)">${statuses.map(s=>`<option ${o.status===s?'selected':''}>${s}</option>`).join('')}</select>
+  ${o.status==='تأجيل'?`<div class="info" style="margin-top:9px"><strong>التأجيل لحد يوم:</strong><input aria-label="تاريخ التأجيل" type="date" value="${esc(o.deferDate||'')}" onchange="setDeferDate(${o.id},this.value)" style="display:block;width:100%;padding:9px;border:1px solid var(--line);border-radius:9px;margin-top:5px;background:white"></div>`:''}
+  <div class="actions"><button class="soft" onclick="changeStatus(${o.id},'تم التسليم')">✓ تم التسليم</button><button class="filter" onclick="changeStatus(${o.id},'إلغاء')">إلغاء الأوردر</button><button class="filter" onclick="editOrder(${o.id})">تعديل</button><button class="filter" onclick="deleteOrder(${o.id})">حذف</button></div></article>`).join('')}</div></section>`
+ }).join('')||'<div class="empty">مفيش أوردرات مطابقة للبحث</div>';
+}
+function changeStatus(id,status){const o=orders.find(x=>x.id===id);if(o){o.status=status;if(status!=='تأجيل')o.deferDate='';save()}}
+function setDeferDate(id,date){const o=orders.find(x=>x.id===id);if(o){o.deferDate=date;localStorage.setItem(key,JSON.stringify(orders))}}
+function editOrder(id){const o=orders.find(x=>x.id===id);if(!o)return;el('formTitle').textContent='تعديل بيانات الأوردر';el('editId').value=o.id;
+ ['name','phone','alt','area','address','details','price','status'].forEach(k=>el(k).value=o[k]??'');el('invoice').value='';el('invoicePreview').style.display='none';el('invoiceHint').textContent=o.invoice?'فيه فاتورة محفوظة بالفعل؛ اختار صورة جديدة لاستبدالها.':'تقدر تفتح الكاميرا وتصوّر الفاتورة مباشرة.';el('dlg').showModal()}
+function deleteOrder(id){if(confirm('متأكد إنك عايز تحذف الأوردر؟')){orders=orders.filter(o=>o.id!==id);save()}}
+el('addBtn').onclick=()=>{el('orderForm').reset();el('formTitle').textContent='إضافة أوردر جديد';el('editId').value='';el('invoicePreview').style.display='none';el('invoiceHint').textContent='تقدر تفتح الكاميرا وتصوّر الفاتورة مباشرة.';el('dlg').showModal()};
+el('cancelBtn').onclick=()=>el('dlg').close();
+function compressImage(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onerror=reject;reader.onload=()=>{const img=new Image();img.onerror=reject;img.onload=()=>{const scale=Math.min(1,1400/Math.max(img.width,img.height));const canvas=document.createElement('canvas');canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);resolve(canvas.toDataURL('image/jpeg',0.76))};img.src=reader.result};reader.readAsDataURL(file)})}
+el('invoice').onchange=async()=>{const f=el('invoice').files[0];if(!f)return;try{const data=await compressImage(f);el('invoicePreview').src=data;el('invoicePreview').style.display='block';el('invoiceHint').textContent='صورة الفاتورة جاهزة للحفظ.'}catch(e){alert('مش قادر أقرأ الصورة، جرّب صورة تانية.')}};
+el('orderForm').onsubmit=async e=>{e.preventDefault();const id=Number(el('editId').value);const old=orders.find(x=>x.id===id);const o={id:id||Math.max(0,...orders.map(x=>x.id))+1};['name','phone','alt','area','address','details','price','status'].forEach(k=>o[k]=el(k).value);o.price=Number(o.price)||0;o.invoice=old?.invoice||'';const file=el('invoice').files[0];if(file){try{o.invoice=await compressImage(file)}catch(err){alert('تعذر حفظ صورة الفاتورة.');return}}if(id)orders=orders.map(x=>x.id===id?o:x);else orders.push(o);save();el('dlg').close()};
+['search','areaFilter','statusFilter'].forEach(k=>el(k).addEventListener(k==='search'?'input':'change',render));
+render();
+</script><script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+}
+</script>
+</body></html>
